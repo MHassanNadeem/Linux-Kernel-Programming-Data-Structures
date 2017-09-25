@@ -185,6 +185,7 @@ int rbtree_task(int *array, int size){
     
     /* Remove numbers */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FIX THIS
     // rb_erase(&tmp->node, &root);
     // kfree(tmp);
     
@@ -197,30 +198,65 @@ int rbtree_task(int *array, int size){
 /*---------------------------------------------------------------------------*/
 
 struct int_hashtableEntry{
-    // struct hlist_node hash;
+    struct hlist_node hnode;
     int data;
 };
 
+/* Hashtable is too big to be declared on the stack */
+DEFINE_HASHTABLE(int_hashtable, 5); /* 2^14 buckets */ /////////////////////////////////////// FIX THIS
+
+struct int_hashtableEntry *hashtable_search(int val){
+    struct int_hashtableEntry *ret;
+    
+    hash_for_each_possible(int_hashtable, ret, hnode, val){
+        if (val == ret->data)
+            return ret;
+    }
+        
+    return NULL;
+}
+
 int hashtable_task(int *array, int size){
-    struct int_hashtableEntry *tmp;
+    int i;
+    struct int_hashtableEntry *tmp, *tmp2;
     
     
     PRINT("=== HASHTABLE TASK ===");
     
     /* Create and init*/
-    DEFINE_HASHTABLE(int_hashtable, 14); /* 2^14 buckets */
     hash_init(int_hashtable);
     
     /* Insert */
-    // tmp = (struct int_hashtableEntry*) kmalloc(10000000000, GFP_KERNEL);
-    // tmp->data = 99;
-    // hash_add(int_hashtable, &tmp->hnode, tmp->data);
+    for(i=0; i<size; i++){
+        tmp = (struct int_hashtableEntry*) kmalloc(sizeof(struct int_hashtableEntry), GFP_KERNEL);
+        tmp->data = array[i];
+        hash_add(int_hashtable, &tmp->hnode, tmp->data);
+    }
     
     /* Iterate */
+    PRINT("- hashtable iteration");
+    hash_for_each(int_hashtable, i, tmp, hnode){
+        DBG(tmp->data, d);
+    }
     
     /* Lookup */
+    PRINT("- hashtable lookup");
+    for(i=0; i<size; i++){
+        tmp = hashtable_search(array[i]);
+        if(tmp == NULL){
+            PRINT("Ops Something is wrong. Key not found");
+            return -1;
+        }else{
+            DBG(tmp->data, d);
+        }
+    }
     
     /* Remove and Destroy */
+    PRINT("- hashtable remove and free");
+    // hash_for_each_safe(int_hashtable, i, tmp2, tmp, hnode){
+        // hash_del(tmp);
+        // kfree(tmp);
+    // }
     
     return 0;
 }
