@@ -331,8 +331,34 @@ int radixtree_task(int *array, int size){
 /*---------------------------------------------------------------------------*/
 
 int bitmap_task(int *array, int size){
+    int i=0;
+    int bitsToSet = 0;
     
     PRINT("=== BITMAP TASK ===");
+    
+    /* Create a bitmap, which is large enough to represent numbers between 0 to 1000 */
+    DECLARE_BITMAP(bitmap, 10);  /* 1000 = 0b1111101000 */
+    
+    /* Clear all bits in the bitmap */
+    bitmap_zero(bitmap, 8*sizeof(bitmap));
+    
+    /* Set bits corresponding to integer numbers in int_str */
+    for(i=0; i<size; i++){
+        bitsToSet |= array[i];
+    }
+    for(i=0; i<8*sizeof(int); i++){
+        if(bitsToSet & 1<<i)
+            set_bit(i, bitmap);
+    }
+    
+    /* Print all bits which are turned on */
+    PRINT("- Bitmap set bits:");
+    for_each_set_bit(i, bitmap, 8*sizeof(bitmap)){
+        DBG(i, d);
+    }
+    
+    /* Clear all bits in the bitmap */
+    bitmap_zero(bitmap, 8*sizeof(bitmap));
     
     return 0;
 }
