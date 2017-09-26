@@ -5,13 +5,12 @@
  * hnadeem@vt.edu
  * */
 
-#pragma GCC diagnostic ignored "-Wdeclaration-after-statement" /* Supress warning */
+#pragma GCC diagnostic ignored "-Wdeclaration-after-statement" /* Suppress warning */
 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/kernel.h>
 #include <linux/list.h>
-#include <linux/kfifo.h>
 #include <linux/slab.h>
 #include <linux/hashtable.h>
 #include <linux/rbtree.h>
@@ -207,7 +206,7 @@ struct int_hashtableEntry{
 };
 
 /* Hashtable is too big to be declared on the stack */
-DEFINE_HASHTABLE(int_hashtable, 14); /* 2^14 buckets */ /////////////////////////////////////// FIX THIS
+DEFINE_HASHTABLE(int_hashtable, 14); /* 2^14 buckets */ // FIX THIS
 
 struct int_hashtableEntry *hashtable_search(int val){
     struct int_hashtableEntry *ret;
@@ -257,7 +256,6 @@ int hashtable_task(int *array, int size){
     }
     
     /* Remove and Destroy */
-    PRINT("- hashtable remove and free");
     hash_for_each_safe(int_hashtable, i, tmp_hlist_node, tmp, hnode){
         hash_del(&tmp->hnode);
         kfree(tmp);
@@ -397,7 +395,7 @@ int init_module(void){
     
 	PRINT("========== PROJECT 2 ==========\n");
 
-	if(linked_list_task(int_array, num_ints))   PRINT("ERROR in linked list task 2\n");
+	if(linked_list_task(int_array, num_ints))   PRINT("ERROR in linked list task\n");
 	if(rbtree_task(int_array, num_ints))        PRINT("ERROR in rbTree task\n");
     if(hashtable_task(int_array, num_ints))     PRINT("ERROR in hash table task\n");
     if(radixtree_task(int_array, num_ints))     PRINT("ERROR in radix tree task\n");
