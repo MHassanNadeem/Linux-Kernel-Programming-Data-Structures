@@ -15,12 +15,13 @@
 #include <linux/slab.h>
 #include <linux/hashtable.h>
 #include <linux/rbtree.h>
+#include <linux/radix-tree.h>
 
 #define DBG(var, type)          printk(KERN_INFO #var" = %"#type"\n", var)
 #define DBGM(var, type, desc)   printk(KERN_INFO desc" = %"#type"\n", var)
 #define PRINT(msg, ...)         printk(KERN_INFO msg, ##__VA_ARGS__)
 
-static char *int_str = "1 2 3";
+static char *int_str = "-1 0 1";
 module_param(int_str, charp, 0);
 MODULE_PARM_DESC(int_str, "Arbitrary list of space separated integers");
 
@@ -184,10 +185,13 @@ int rbtree_task(int *array, int size){
     }
     
     /* Remove numbers */
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // FIX THIS
-    // rb_erase(&tmp->node, &root);
-    // kfree(tmp);
+    for(i = 0; i<size; i++){
+        tmp = rbtree_search(&root, array[i]);
+        if(tmp != NULL){
+            rb_erase(&tmp->node, &root);
+            kfree(tmp);
+        }
+    }
     
 	return 0;
 }
@@ -203,7 +207,7 @@ struct int_hashtableEntry{
 };
 
 /* Hashtable is too big to be declared on the stack */
-DEFINE_HASHTABLE(int_hashtable, 5); /* 2^14 buckets */ /////////////////////////////////////// FIX THIS
+DEFINE_HASHTABLE(int_hashtable, 14); /* 2^14 buckets */ /////////////////////////////////////// FIX THIS
 
 struct int_hashtableEntry *hashtable_search(int val){
     struct int_hashtableEntry *ret;
@@ -218,7 +222,8 @@ struct int_hashtableEntry *hashtable_search(int val){
 
 int hashtable_task(int *array, int size){
     int i;
-    struct int_hashtableEntry *tmp, *tmp2;
+    struct int_hashtableEntry *tmp;
+    struct hlist_node *tmp_hlist_node;
     
     
     PRINT("=== HASHTABLE TASK ===");
@@ -253,10 +258,10 @@ int hashtable_task(int *array, int size){
     
     /* Remove and Destroy */
     PRINT("- hashtable remove and free");
-    // hash_for_each_safe(int_hashtable, i, tmp2, tmp, hnode){
-        // hash_del(tmp);
-        // kfree(tmp);
-    // }
+    hash_for_each_safe(int_hashtable, i, tmp_hlist_node, tmp, hnode){
+        hash_del(&tmp->hnode);
+        kfree(tmp);
+    }
     
     return 0;
 }
@@ -267,8 +272,36 @@ int hashtable_task(int *array, int size){
 /*---------------------------------------------------------------------------*/
 
 int radixtree_task(int *array, int size){
+    int ret, i;
     
     PRINT("=== RADIX TREE TASK ===");
+    
+    /* Create a radix tree, which is indexed by integer numbers */
+    struct radix_tree_root root;
+    INIT_RADIX_TREE(&root, GFP_KERNEL);
+    
+    /* Insert integer numbers in int_str to the radix tree */
+    for(i=0; i<size; i++){
+        ret = radix_tree_insert(&root, array[i], 0);
+        if(ret == -EEXIST){
+            PRINT("Error inserting key already exists");
+            return -1;
+        }else if(ret != 0){
+            PRINT("Error inserting number into radix tree");
+            return -1;
+        }
+    }
+    
+    /* Look up the inserted numbers and print them out */
+    
+    /* Tag all odd numbers in the radix tree */
+    
+    /* Look up all tagged odd number using radix_tree_gang_lookup_tag */
+    
+    /* Remove all inserted numbers in the radix tree */
+    for(i=0; i<size; i++){
+        radix_tree_delete(&root, array[i]);
+    }
     
     return 0;
 }
