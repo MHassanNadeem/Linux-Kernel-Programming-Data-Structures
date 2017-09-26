@@ -271,8 +271,14 @@ int hashtable_task(int *array, int size){
 /* Radix Tree */
 /*---------------------------------------------------------------------------*/
 
+#define isEven(x) (x%2 == 0)
+#define isOdd(x) (!isEven(x))
+#define TAG_ODD 1 /* tag for radix tree */
+
 int radixtree_task(int *array, int size){
     int ret, i;
+    void *lookupResult;
+    void *voidPtrArray[size];
     
     PRINT("=== RADIX TREE TASK ===");
     
@@ -282,7 +288,7 @@ int radixtree_task(int *array, int size){
     
     /* Insert integer numbers in int_str to the radix tree */
     for(i=0; i<size; i++){
-        ret = radix_tree_insert(&root, array[i], 0);
+        ret = radix_tree_insert(&root, array[i], (void*)&array[i]);
         if(ret == -EEXIST){
             PRINT("Error inserting key already exists");
             return -1;
@@ -293,10 +299,25 @@ int radixtree_task(int *array, int size){
     }
     
     /* Look up the inserted numbers and print them out */
+    PRINT("- radixtree lookup");
+    for(i=0; i<size; i++){
+        lookupResult = radix_tree_lookup(&root, array[i]);
+        DBG(*(int*)lookupResult, d);
+    }
     
     /* Tag all odd numbers in the radix tree */
+    for(i=0; i<size; i++){
+        if(isOdd(array[i]))
+            radix_tree_tag_set(&root, array[i], TAG_ODD);
+    }
     
     /* Look up all tagged odd number using radix_tree_gang_lookup_tag */
+    PRINT("- radixtree odd number lookup");
+    ret = radix_tree_gang_lookup_tag(&root, voidPtrArray, 0, size, TAG_ODD);
+    for(i=0; i<ret; i++){
+        DBG(*(int*)voidPtrArray[i], d);
+    }
+        
     
     /* Remove all inserted numbers in the radix tree */
     for(i=0; i<size; i++){
