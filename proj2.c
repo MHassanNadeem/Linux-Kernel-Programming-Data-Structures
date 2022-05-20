@@ -418,11 +418,11 @@ int init_module(void){
         return -1;
     }
     
-    
-	PRINT("========== PROJECT 2 ==========\n");
 
-	if(linked_list_task(int_array, num_ints))   PRINT("ERROR in linked list task\n");
-	if(rbtree_task(int_array, num_ints))        PRINT("ERROR in rbTree task\n");
+    PRINT("========== PROJECT 2 ==========\n");
+
+    if(linked_list_task(int_array, num_ints))   PRINT("ERROR in linked list task\n");
+    if(rbtree_task(int_array, num_ints))        PRINT("ERROR in rbTree task\n");
     if(hashtable_task(int_array, num_ints))     PRINT("ERROR in hash table task\n");
     if(radixtree_task(int_array, num_ints))     PRINT("ERROR in radix tree task\n");
     if(bitmap_task(int_array, num_ints))        PRINT("ERROR in bitmap task\n");
